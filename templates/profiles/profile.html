@@ -1,0 +1,9 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div>{{ object.username }}</div>
+<img src="{{ object.profile_pic.url }}" width="100px">
+<div>{{ object.description }}</div>
+{% if is_same_user %}
+<a href="{% url 'profiles:update' object.pk %}">Обновить профиль</a>
+{% endif %}
+{% endblock content %}

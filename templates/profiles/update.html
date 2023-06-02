@@ -1,0 +1,11 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <p>{{ form.username.label_tag }} {{form.username}}</p>
+    <p>{{ form.description.label_tag }} {{form.description}}</p>
+    <p>{{ form.profile_pic.label_tag }} {{form.profile_pic}}</p>
+    <button type="submit" class="btn btn-success">Обновить</button>
+</form>
+{% endblock content %}
