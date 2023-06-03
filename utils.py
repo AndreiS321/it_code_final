@@ -1,5 +1,6 @@
 menu = [
     {"title": "Главная", "url_name": "core:index"},
+    {"title": "Форум", "url_name": "forum:categories"},
 ]
 
 unauthorized_menu = [

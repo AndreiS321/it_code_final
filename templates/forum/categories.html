@@ -1,0 +1,21 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<table class="table text-center mt-2">
+    <thead class="table-primary">
+    <tr>
+        <th>Название категории</th>
+        <th>Дата создания</th>
+        <th>Последнее изменение</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for category in objects %}
+    <tr>
+    <td><a href="#">{{ category.name }}</a></td>
+    <td><div>{{ category.created_at }}</div></td>
+    <td><div>{{ category.changed_at }}</div></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}
