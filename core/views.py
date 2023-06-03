@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 
-from profiles.mixins import AuthMenuMixin
+from mixins import AuthMenuMixin
 
 
 class IndexView(AuthMenuMixin, View):

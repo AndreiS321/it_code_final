@@ -7,17 +7,16 @@ from django.views import View
 from django.views.generic import DetailView, CreateView, UpdateView
 
 import utils
+from mixins import LoginRequiredMixin, AuthMenuMixin
 from profiles import models, forms
-from profiles.mixins import LoginRequiredMixin, AuthMenuMixin
 
 
 class ProfileDetail(AuthMenuMixin, DetailView):
     model = models.Profile
     template_name = "profiles/profile.html"
 
-
     def get_context_data(self, **kwargs):
-        context = self.get_user_context_data(context=super().get_context_data())
+        context = super().get_context_data()
         if utils.is_same_user(self.request, context["object"].pk):
             context["is_same_user"] = True
         return context
@@ -37,20 +36,12 @@ class ProfileUpdate(AuthMenuMixin, LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse("profiles:profile", kwargs={"pk": self.request.user.pk})
 
-    def get_context_data(self, **kwargs):
-        context = self.get_user_context_data(context=super().get_context_data())
-        return context
-
 
 class RegisterView(AuthMenuMixin, CreateView):
     model = models.Profile
     form_class = forms.ProfileCreate
     template_name = "profiles/registration.html"
     success_url = reverse_lazy("profiles:login")
-
-    def get_context_data(self, **kwargs):
-        context = self.get_user_context_data(context=super().get_context_data())
-        return context
 
 
 class LoginView(AuthMenuMixin, LoginViewDjango):
@@ -59,14 +50,8 @@ class LoginView(AuthMenuMixin, LoginViewDjango):
     def get_success_url(self):
         return reverse("core:index")
 
-    def get_context_data(self, **kwargs):
-        context = self.get_user_context_data(context=super().get_context_data())
-        return context
-
 
 class LogoutView(View):
     def get(self, request):
         logout(request)
         return redirect(reverse("core:index"))
-
-
