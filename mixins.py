@@ -7,6 +7,12 @@ import utils
 
 
 class MenuMixin:
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context = self.get_user_context_data(context=context)
+        return context
+
     def get_user_context_data(self, context: dict = None, *, object_list=None, **kwargs):
         if not context:
             context = dict()
