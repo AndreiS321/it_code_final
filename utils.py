@@ -1,3 +1,8 @@
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+
+from profiles.models import Profile
+
 menu = [
     {"title": "Главная", "url_name": "core:index"},
     {"title": "Форум", "url_name": "forum:categories"},
@@ -17,5 +22,11 @@ profile = [
 ]
 
 
-def is_same_user(request, pk) -> bool:
-    return request.user.pk == pk
+def is_same_user(user1: Profile | int, user2: Profile | int) -> bool:
+    user1 = user1.pk if isinstance(user1, Profile) else user1
+    user2 = user2.pk if isinstance(user2, Profile) else user2
+    return user1 == user2
+
+
+def handle_no_permission(redirect_to: str) -> HttpResponseRedirect:
+    return redirect(redirect_to)
