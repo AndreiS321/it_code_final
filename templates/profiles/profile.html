@@ -1,9 +1,42 @@
 {% extends 'base/base.html' %}
 {% block content %}
-<div>{{ object.username }}</div>
-<img src="{{ object.profile_pic.url }}" width="100px">
-<div>{{ object.description }}</div>
-{% if is_same_user %}
-<a href="{% url 'profiles:update' object.pk %}">Обновить профиль</a>
-{% endif %}
+<div class="card d-flex flex-row m-3">
+    <div style="height:100px; width:100px;overflow:hidden;" class="col-md-2 m-3">
+        <img src="{{ object.profile_pic.url }}" class="img-thumbnail">
+    </div>
+    <div class="card-body d-flex flex-column col-md-10">
+        <h5 class="card-title">{{ object.username }}</h5>
+        <p class="card-text">{{ object.description }}<p>
+        {% if latest_messages %}
+        <h5 class="card-title">Последние сообщения пользователя</h5>
+        {% endif %}
+        {% for msg in latest_messages %}
+        <div class="card mb-3 mx-auto" style="width: 100%;">
+            <a class="link-underline link-underline-opacity-0 text-black flex-grow-1"
+               href="{% url 'forum:theme' msg.theme.pk %}">
+                <div class="row g-0">
+                    <div class="col-md-2 m-2" style="height:100px; width:100px;overflow:hidden;">
+                        <img src="{{msg.from_user.profile_pic.url}}"
+                             class="img-thumbnail rounded-start mx-auto flex-grow-1">
+                    </div>
+                    <div class="col-md-10">
+                        <div class="card-body">
+                            <h5 class="card-title">{{msg.from_user.username }}</h5>
+
+                            <p class="card-text">{{ msg.text }}</p>
+                            <p class="card-text"><small class="text-body-secondary">{{ msg.created_at }}</small></p>
+                            <p class="card-text"><small class="text-body-secondary">Из темы {{ msg.theme.name }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% empty %}
+        <p class="card-text">Пользователь не отправлял сообщения</p>
+        {% endfor %}
+        {% if is_same_user %}
+        <a href="{% url 'profiles:update' object.pk %}" class="btn btn-primary">Обновить профиль</a>
+        {% endif %}
+    </div>
+</div>
 {% endblock content %}

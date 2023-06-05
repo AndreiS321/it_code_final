@@ -12,7 +12,8 @@ class NoInitialValueFileInput(forms.ClearableFileInput):
 class ProfileUpdate(UserChangeForm):
     password = None
     profile_pic = forms.ImageField(initial=None,
-                                   label="Аватар профиля", widget=NoInitialValueFileInput)
+                                   label="Аватар профиля",
+                                   widget=NoInitialValueFileInput)
 
     class Meta:
         model = models.Profile
