@@ -1,21 +1,39 @@
 {% extends 'base/base.html' %}
 {% block content %}
+<div class="display-4 text-center">Список категорий</div>
 <table class="table text-center mt-2">
     <thead class="table-primary">
     <tr>
-        <th>Название категории</th>
+        <th style="width: 60%;">Название категории</th>
+        <th>Создатель</th>
         <th>Дата создания</th>
         <th>Последнее изменение</th>
+        <th></th>
     </tr>
     </thead>
     <tbody>
-    {% for category in objects %}
+    {% for category in object_list %}
     <tr>
-    <td><a href="#">{{ category.name }}</a></td>
-    <td><div>{{ category.created_at }}</div></td>
-    <td><div>{{ category.changed_at }}</div></td>
+        <td><a class="link-underline text-black" style="word-break: break-all;" href="{% url 'forum:themes' category.pk %}">{{ category.name }}</a></td>
+        <td>
+            <div><a href="{% url 'profiles:profile' category.creator.pk %}" class="link-underline link-underline-opacity-0 text-black">{{ category.creator.username }}</a></div>
+        </td>
+        <td>
+            <div>{{ category.created_at }}</div>
+        </td>
+        <td>
+            <div>{{ category.changed_at }}</div>
+        </td>
+        {% if user.is_staff %}
+        <td>
+            <div><a href="{% url 'forum:category_delete' category.pk %}" class="btn btn-danger m-3">Удалить</a></div>
+        </td>
+        {% endif %}
     </tr>
     {% endfor %}
     </tbody>
 </table>
+{% if user.is_staff %}
+<a href="{% url 'forum:category_create' %}" class="btn btn-primary m-3">Добавить новую категорию</a>
+{% endif %}
 {% endblock content %}

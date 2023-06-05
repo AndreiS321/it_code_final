@@ -1,0 +1,75 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="display-4  text-center">Тема {{ theme.name }}</div>
+<div class="pagination m-3">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            {% if 1 != page_obj.previous_page_number %}
+            <a class="page-link d-inline" href="?page=1">&laquo; 1</a>
+            {% endif %}
+            <a class="page-link d-inline" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+
+        <span class="current page-link d-inline text-black">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a class="page-link d-inline"
+               href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+            {% if page_obj.paginator.num_pages != page_obj.next_page_number %}
+            <a class="page-link d-inline" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }} &raquo;</a>
+            {% endif %}
+        {% endif %}
+    </span>
+</div>
+{% for message in object_list %}
+<div class="card mb-3 mx-auto" style="max-width: 700px;">
+    <div class="row g-0">
+        <div class="col-md-2 m-2" style="height:100px; width:100px;overflow:hidden;">
+            <img src="{{message.from_user.profile_pic.url}}" class="img-thumbnail rounded-start mx-auto flex-grow-1">
+        </div>
+        <div class="col-md-10">
+            <div class="card-body">
+                <h5 class="card-title"><a class="link-underline link-underline-opacity-0 text-black"
+                                          href="{% url 'profiles:profile' message.from_user.pk %}">{{ message.from_user.username }}</a></h5>
+                <p class="card-text">{{ message.text }}</p>
+                <p class="card-text"><small class="text-body-secondary">{{ message.created_at }}</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% empty %}
+<div class="display-4 text-center">Нет сообщений в теме!</div>
+{% endfor %}
+<div class="mx-auto d-flex">
+<form class="form mx-auto d-flex flex-column" method="post" action="{% url 'forum:create_message' %}">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-success m-3">Отправить</button>
+</form>
+</div>
+<div class="pagination m-3">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            {% if 1 != page_obj.previous_page_number %}
+            <a class="page-link d-inline" href="?page=1">&laquo; 1</a>
+            {% endif %}
+            <a class="page-link d-inline" href="?page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+
+        <span class="current page-link d-inline text-black">
+            Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a class="page-link d-inline"
+               href="?page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+            {% if page_obj.paginator.num_pages != page_obj.next_page_number %}
+            <a class="page-link d-inline" href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }} &raquo;</a>
+            {% endif %}
+        {% endif %}
+    </span>
+</div>
+{% endblock content %}

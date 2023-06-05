@@ -1,0 +1,42 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div class="display-4  text-center">Категория {{ category.name }}</div>
+<table class="table text-center mt-2">
+    <thead class="table-primary">
+    <tr>
+        <th style="width: 60%;">Название темы</th>
+        <th>Создатель</th>
+        <th>Дата создания</th>
+        <th>Последнее изменение</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for theme in object_list %}
+    <tr>
+        <td><a href="{% url 'forum:theme' theme.pk %}" class="link-underline text-black">{{ theme.name }}</a></td>
+        <td>
+            <div><a href="{% url 'profiles:profile' theme.creator.pk %}" class="link-underline link-underline-opacity-0 text-black">{{ theme.creator.username }}</a></div>
+        </td>
+        <td>
+            <div>{{ theme.created_at }}</div>
+        </td>
+        <td>
+            <div>{{ theme.changed_at }}</div>
+        </td>
+        {% if user.is_staff or theme.creator.pk == user.pk %}
+        <td>
+            <div><a href="{% url 'forum:theme_delete' category.pk theme.pk %}" class="btn btn-danger m-3">Удалить</a></div>
+        </td>
+        {% endif %}
+    </tr>
+    {% empty %}
+    <div class="display-4  text-center">В категории нет тем</div>
+    {% endfor %}
+    </tbody>
+</table>
+{% if user.is_authenticated %}
+<a style="word-break: break-all;" href="{% url 'forum:theme_create' category.pk %}" class="btn btn-primary m-3">Добавить
+    новую тему</a>
+{% endif %}
+{% endblock content %}

@@ -1,0 +1,9 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div class="display-4 text-center">Создание темы</div>
+<form class="form mx-auto d-flex flex-column" method="post" action="{% url 'forum:theme_create' category_pk %}">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit" class="btn btn-success m-3">Добавить</button>
+</form>
+{% endblock content %}

@@ -6,6 +6,8 @@ from django.db import models
 
 class Category(models.Model):
     name = models.CharField("название категории", max_length=255)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     changed_at = models.DateTimeField(auto_now=True)
 
@@ -20,7 +22,10 @@ class Category(models.Model):
 
 class Theme(models.Model):
     name = models.CharField("название темы", max_length=255)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE,
+                                 related_name="themes")
     created_at = models.DateTimeField(auto_now_add=True)
     changed_at = models.DateTimeField(auto_now=True)
 
@@ -35,7 +40,8 @@ class Theme(models.Model):
 
 class Message(models.Model):
     text = models.TextField("текст сообщения")
-    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                                  on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     changed_at = models.DateTimeField(auto_now=True)
 
@@ -46,4 +52,8 @@ class Message(models.Model):
 
 
 class ThemeMessage(Message):
-    theme = models.ForeignKey(Theme, on_delete=models.CASCADE, related_name="messages")
+    theme = models.ForeignKey(Theme, on_delete=models.CASCADE,
+                              related_name="messages")
+
+    class Meta(Message.Meta):
+        ordering = ("created_at",)
