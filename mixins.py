@@ -1,6 +1,7 @@
 from copy import deepcopy
 
-from django.contrib.auth.mixins import LoginRequiredMixin as LoginRequiredMixinDjango
+from django.contrib.auth.mixins import \
+    LoginRequiredMixin as LoginRequiredMixinDjango, AccessMixin
 from django.urls import reverse_lazy
 
 import utils
@@ -9,11 +10,12 @@ import utils
 class MenuMixin:
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data()
+        context = super().get_context_data(kwargs=kwargs)
         context = self.get_user_context_data(context=context)
         return context
 
-    def get_user_context_data(self, context: dict = None, *, object_list=None, **kwargs):
+    def get_user_context_data(self, context: dict = None,
+                              *, object_list=None, **kwargs):
         if not context:
             context = dict()
         context["menu"] = deepcopy(utils.menu.copy())
@@ -21,7 +23,8 @@ class MenuMixin:
 
 
 class AuthMenuMixin(MenuMixin):
-    def get_user_context_data(self, context: dict = None, *, object_list=None, **kwargs):
+    def get_user_context_data(self, context: dict = None,
+                              *, object_list=None, **kwargs):
         context = super().get_user_context_data(context, kwargs=kwargs)
         if self.request.user.is_authenticated:
             profile_menu = deepcopy(utils.profile)
@@ -35,3 +38,12 @@ class AuthMenuMixin(MenuMixin):
 
 class LoginRequiredMixin(LoginRequiredMixinDjango):
     login_url = reverse_lazy("profiles:login")
+
+
+class StaffOnlyMixin(AccessMixin):
+    login_url = reverse_lazy("profiles:login")
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:
+            return self.handle_no_permission()
+        return super().dispatch(request, *args, **kwargs)
