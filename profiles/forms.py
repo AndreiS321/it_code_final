@@ -14,6 +14,9 @@ class ProfileUpdate(UserChangeForm):
     profile_pic = forms.ImageField(initial=None,
                                    label="Аватар профиля",
                                    widget=NoInitialValueFileInput)
+    description = forms.CharField(label="Сообщение",
+                                  widget=forms.Textarea,
+                                  required=False)
 
     class Meta:
         model = models.Profile
