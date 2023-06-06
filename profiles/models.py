@@ -3,7 +3,7 @@ from django.db import models
 
 
 def get_pic_url(self, filename):
-    return f"profiles/{self.pk}/profile_pic/{filename}"
+    return f"images/profiles/{self.pk}/profile_pic/{filename}"
 
 
 class Profile(AbstractUser):
