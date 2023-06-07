@@ -2,8 +2,10 @@ from django.test import TestCase, Client
 from django.urls import reverse
 
 from forum import models
-from forum.factories import CategoryFactory, ThemeFactory, ThemeMessageFactory
-from profiles.factories import PASSWORD, AdminFactory, ProfileFactory
+from forum.factories import CategoryFactory, \
+    ThemeFactory, ThemeMessageFactory
+from profiles.factories import PASSWORD, \
+    AdminFactory, ProfileFactory
 
 
 # Create your tests here.
@@ -124,17 +126,6 @@ class ThemesTests(TestCase):
             name=theme.name).first()
         self.assertEqual(theme_db.name, theme.name)
 
-    def test_theme_create_unauthorized(self):
-        category = CategoryFactory.create()
-        theme = ThemeFactory.build(category=category)
-        resp = self.unauthorized_client.post(
-            reverse("forum:theme_create",
-                    kwargs={"category_pk": category.pk}),
-            {"name": theme.name})
-        theme_db = models.Theme.objects.filter(
-            name=theme.name).first()
-        self.assertIsNone(theme_db)
-
     def test_theme_create_not_staff(self):
         category = CategoryFactory.create()
         theme = ThemeFactory.build(category=category)
@@ -145,6 +136,17 @@ class ThemesTests(TestCase):
         theme_db = models.Theme.objects.filter(
             name=theme.name).first()
         self.assertEqual(theme_db.name, theme.name)
+
+    def test_theme_create_unauthorized(self):
+        category = CategoryFactory.create()
+        theme = ThemeFactory.build(category=category)
+        resp = self.unauthorized_client.post(
+            reverse("forum:theme_create",
+                    kwargs={"category_pk": category.pk}),
+            {"name": theme.name})
+        theme_db = models.Theme.objects.filter(
+            name=theme.name).first()
+        self.assertIsNone(theme_db)
 
     def test_theme_delete(self):
         category = CategoryFactory.create()
@@ -170,7 +172,8 @@ class ThemesTests(TestCase):
 
     def test_theme_delete_not_staff(self):
         category = CategoryFactory.create()
-        theme = ThemeFactory.create(category=category, creator=self.user)
+        theme = ThemeFactory.create(category=category,
+                                    creator=self.user)
         resp = self.client.post(
             reverse("forum:theme_delete",
                     kwargs={"category_pk": category.pk,
@@ -211,3 +214,48 @@ class ThemesTests(TestCase):
         theme_db = models.Theme.objects.filter(
             name=theme.name).first()
         self.assertIsNone(theme_db)
+
+    def test_msg_delete(self):
+        theme = ThemeFactory.create()
+        msg = ThemeMessageFactory.create(theme=theme)
+        resp = self.admin_client.post(
+            reverse("forum:delete_message",
+                    kwargs={"theme_pk": theme.pk,
+                            "pk": msg.pk}))
+        msg_db = models.ThemeMessage.objects.filter(
+            pk=msg.pk).first()
+        self.assertIsNone(msg_db)
+
+    def test_msg_delete_unauthorized(self):
+        theme = ThemeFactory.create()
+        msg = ThemeMessageFactory.create(theme=theme)
+        resp = self.unauthorized_client.post(
+            reverse("forum:delete_message",
+                    kwargs={"theme_pk": theme.pk,
+                            "pk": msg.pk}))
+        msg_db = models.ThemeMessage.objects.filter(
+            pk=msg.pk).first()
+        self.assertIsNotNone(msg_db)
+
+    def test_msg_delete_not_staff(self):
+        theme = ThemeFactory.create()
+        msg = ThemeMessageFactory.create(theme=theme,
+                                         from_user=self.user)
+        resp = self.client.post(
+            reverse("forum:delete_message",
+                    kwargs={"theme_pk": theme.pk,
+                            "pk": msg.pk}))
+        msg_db = models.ThemeMessage.objects.filter(
+            pk=msg.pk).first()
+        self.assertIsNone(msg_db)
+
+    def test_msg_delete_not_staff_failed(self):
+        theme = ThemeFactory.create()
+        msg = ThemeMessageFactory.create(theme=theme)
+        resp = self.client.post(
+            reverse("forum:delete_message",
+                    kwargs={"theme_pk": theme.pk,
+                            "pk": msg.pk}))
+        msg_db = models.ThemeMessage.objects.filter(
+            pk=msg.pk).first()
+        self.assertIsNotNone(msg_db)
