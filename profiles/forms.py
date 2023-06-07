@@ -14,7 +14,7 @@ class ProfileUpdate(UserChangeForm):
     profile_pic = forms.ImageField(initial=None,
                                    label="Аватар профиля",
                                    widget=NoInitialValueFileInput)
-    description = forms.CharField(label="Сообщение",
+    description = forms.CharField(label="Обо мне",
                                   widget=forms.Textarea,
                                   required=False)
 
