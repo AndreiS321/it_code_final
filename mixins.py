@@ -3,19 +3,15 @@ from copy import deepcopy
 from django.contrib.auth.mixins import \
     LoginRequiredMixin as LoginRequiredMixinDjango, AccessMixin
 from django.urls import reverse_lazy
+from django.views.generic.base import ContextMixin
 
 import utils
 
 
-class MenuMixin:
+class MenuMixin(ContextMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(kwargs=kwargs)
-        context = self.get_user_context_data(context=context)
-        return context
-
-    def get_user_context_data(self, context: dict = None,
-                              *, object_list=None, **kwargs):
         if not context:
             context = dict()
         context["menu"] = deepcopy(utils.menu.copy())
@@ -23,9 +19,8 @@ class MenuMixin:
 
 
 class AuthMenuMixin(MenuMixin):
-    def get_user_context_data(self, context: dict = None,
-                              *, object_list=None, **kwargs):
-        context = super().get_user_context_data(context, kwargs=kwargs)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(kwargs=kwargs)
         if self.request.user.is_authenticated:
             profile_menu = deepcopy(utils.profile)
             profile_menu[0]["user_pk"] = self.request.user.pk

@@ -44,7 +44,7 @@
 <div class="display-4 text-center">Нет сообщений в теме!</div>
 {% endfor %}
 <div class="mx-auto d-flex">
-<form class="form mx-auto d-flex flex-column" method="post" action="{% url 'forum:create_message' %}">
+<form class="mx-auto d-flex flex-column" method="post" action="{% url 'forum:create_message' %}">
     {% csrf_token %}
     {{ form }}
     <button type="submit" class="btn btn-success m-3">Отправить</button>

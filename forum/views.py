@@ -5,13 +5,15 @@ from django.views.generic import ListView, CreateView, DeleteView
 
 import utils
 from forum import models, forms
-from mixins import AuthMenuMixin, StaffOnlyMixin, LoginRequiredMixin
+from mixins import AuthMenuMixin, StaffOnlyMixin, \
+    LoginRequiredMixin
 
 
 # Create your views here.
 class CategoriesView(AuthMenuMixin, ListView):
     model = models.Category
     template_name = "forum/categories.html"
+    extra_context = {"title": "Категории"}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(kwargs=kwargs)
@@ -25,6 +27,7 @@ class CategoryCreate(StaffOnlyMixin, LoginRequiredMixin,
     template_name = "forum/category_create.html"
     fields = ("name",)
     success_url = reverse_lazy("forum:categories")
+    extra_context = {"title": "Создание категории"}
 
     def post(self, request, *args, **kwargs):
         category_name = request.POST.get("name")
@@ -38,6 +41,7 @@ class CategoryDelete(StaffOnlyMixin, LoginRequiredMixin,
     model = models.Category
     template_name = "forum/category_delete.html"
     success_url = reverse_lazy("forum:categories")
+    extra_context = {"title": "Удаление категории"}
 
 
 class ThemesView(AuthMenuMixin, ListView):
@@ -51,18 +55,22 @@ class ThemesView(AuthMenuMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(kwargs=kwargs)
 
-        context["category"] = get_object_or_404(
+        category = get_object_or_404(
             models.Category,
             pk=self.kwargs.get("category_pk"))
+        context["category"] = category
+        context["title"] = f"Категория {category.name}"
 
         context["user"] = self.request.user
         return context
 
 
-class ThemeCreate(LoginRequiredMixin, AuthMenuMixin, CreateView):
+class ThemeCreate(LoginRequiredMixin, AuthMenuMixin,
+                  CreateView):
     model = models.Theme
     template_name = "forum/theme_create.html"
     fields = ("name",)
+    extra_context = {"title": "Создание темы"}
 
     def get_success_url(self):
         return reverse("forum:themes",
@@ -83,10 +91,12 @@ class ThemeCreate(LoginRequiredMixin, AuthMenuMixin, CreateView):
                                 kwargs={"category_pk": category_pk}))
 
 
-class ThemeDelete(LoginRequiredMixin, AuthMenuMixin, DeleteView):
+class ThemeDelete(LoginRequiredMixin, AuthMenuMixin,
+                  DeleteView):
     model = models.Theme
     template_name = "forum/theme_delete.html"
     success_url = reverse_lazy("forum:categories")
+    extra_context = {"title": "Удаление темы"}
 
     def dispatch(self, request, *args, **kwargs):
         creator = get_object_or_404(models.Theme,
@@ -115,12 +125,14 @@ class ThemeMessagesView(AuthMenuMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(kwargs=kwargs)
+
         theme = get_object_or_404(models.Theme,
                                   pk=self.kwargs.get("pk"))
         context["theme"] = theme
+        context["title"] = f"Тема {theme.name}"
+
         context["form"] = forms.ThemeMessageForm(
-            initial={"theme_pk": theme.pk,
-                     "user_pk": self.request.user.pk})
+            initial={"theme_pk": theme.pk})
         return context
 
 
@@ -136,3 +148,26 @@ class ThemeMessageCreate(LoginRequiredMixin, View):
         return redirect(
             f'{reverse("forum:theme", kwargs={"pk": theme_pk})}'
             f'?page=last')
+
+
+class ThemeMessageCreateDelete(LoginRequiredMixin, AuthMenuMixin,
+                               DeleteView):
+    model = models.Theme
+    template_name = "forum/theme_delete.html"
+    success_url = reverse_lazy("forum:categories")
+    extra_context = {"title": "Удаление темы"}
+
+    def dispatch(self, request, *args, **kwargs):
+        creator = get_object_or_404(models.Theme,
+                                    pk=self.kwargs.get("pk")).creator
+        is_same_user = utils.is_same_user(request.user, creator)
+        if not (self.request.user.is_staff or is_same_user):
+            return utils.handle_no_permission(
+                reverse("forum:themes",
+                        kwargs={"category_pk": self.kwargs.get("category_pk")
+                                }))
+        return super().dispatch(request, args=args, kwargs=kwargs)
+
+    def get_success_url(self):
+        return reverse("forum:themes",
+                       kwargs={"category_pk": self.kwargs.get("category_pk")})

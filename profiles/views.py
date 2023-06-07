@@ -15,6 +15,7 @@ from profiles import models, forms
 class ProfileDetail(AuthMenuMixin, DetailView):
     model = models.Profile
     template_name = "profiles/profile.html"
+    extra_context = {"title": "Профиль"}
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data()
@@ -25,15 +26,17 @@ class ProfileDetail(AuthMenuMixin, DetailView):
         return context
 
 
-class ProfileUpdate(AuthMenuMixin, LoginRequiredMixin, UpdateView):
+class ProfileUpdate(AuthMenuMixin, LoginRequiredMixin,
+                    UpdateView):
     model = models.Profile
     form_class = forms.ProfileUpdate
     template_name = "profiles/update.html"
+    extra_context = {"title": "Редактирование профиля"}
 
     def get(self, request, *args, **kwargs):
         obj = self.get_object()
         if not utils.is_same_user(request.user, obj.pk):
-            raise PermissionDenied("Нет доступа")
+            raise PermissionDenied()
         return super().get(request, args, kwargs)
 
     def get_success_url(self):
@@ -46,10 +49,13 @@ class RegisterView(AuthMenuMixin, CreateView):
     form_class = forms.ProfileCreate
     template_name = "profiles/registration.html"
     success_url = reverse_lazy("profiles:login")
+    extra_context = {"title": "Регистрация"}
 
 
 class LoginView(AuthMenuMixin, LoginViewDjango):
     template_name = "profiles/login.html"
+    extra_context = {"title": "Вход"}
+
 
     def get_success_url(self):
         return reverse("core:index")

@@ -1,7 +1,7 @@
 {% extends 'base/base.html' %}
 {% block content %}
 <div class="display-4 text-center">Удаление темы</div>
-<form method="post">
+<form class="m-3" method="post">
     {% csrf_token %}
     {{ form }}
     <p>Удалить тему {{ object.name }}?</p>
