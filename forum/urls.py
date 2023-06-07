@@ -24,4 +24,7 @@ urlpatterns = [
 
     path("message/create/", views.ThemeMessageCreate.as_view(),
          name="create_message"),
+    path("message/delete/<int:theme_pk>/<int:pk>",
+         views.ThemeMessageDelete.as_view(),
+         name="delete_message"),
 ]

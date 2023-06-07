@@ -1,3 +1,5 @@
+from django.core.exceptions import PermissionDenied
+from django.db.models import Count
 from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse, reverse_lazy
 from django.views import View
@@ -14,6 +16,10 @@ class CategoriesView(AuthMenuMixin, ListView):
     model = models.Category
     template_name = "forum/categories.html"
     extra_context = {"title": "Категории"}
+
+    def get_queryset(self):
+        return self.model.objects.annotate(
+            themes_count=Count("themes"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(kwargs=kwargs)
@@ -50,7 +56,8 @@ class ThemesView(AuthMenuMixin, ListView):
 
     def get_queryset(self):
         pk = self.kwargs.get("category_pk")
-        return self.model.objects.filter(category__pk=pk)
+        return self.model.objects.filter(category__pk=pk).annotate(
+            msg_count=Count("messages"))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(kwargs=kwargs)
@@ -95,7 +102,6 @@ class ThemeDelete(LoginRequiredMixin, AuthMenuMixin,
                   DeleteView):
     model = models.Theme
     template_name = "forum/theme_delete.html"
-    success_url = reverse_lazy("forum:categories")
     extra_context = {"title": "Удаление темы"}
 
     def dispatch(self, request, *args, **kwargs):
@@ -131,6 +137,9 @@ class ThemeMessagesView(AuthMenuMixin, ListView):
         context["theme"] = theme
         context["title"] = f"Тема {theme.name}"
 
+        context["is_staff"] = self.request.user.is_staff
+        context["user"] = self.request.user
+
         context["form"] = forms.ThemeMessageForm(
             initial={"theme_pk": theme.pk})
         return context
@@ -150,24 +159,23 @@ class ThemeMessageCreate(LoginRequiredMixin, View):
             f'?page=last')
 
 
-class ThemeMessageCreateDelete(LoginRequiredMixin, AuthMenuMixin,
-                               DeleteView):
-    model = models.Theme
-    template_name = "forum/theme_delete.html"
-    success_url = reverse_lazy("forum:categories")
-    extra_context = {"title": "Удаление темы"}
+class ThemeMessageDelete(LoginRequiredMixin, AuthMenuMixin,
+                         DeleteView):
+    model = models.ThemeMessage
+    template_name = "forum/msg_delete.html"
+    extra_context = {"title": "Удаление сообщения"}
 
     def dispatch(self, request, *args, **kwargs):
-        creator = get_object_or_404(models.Theme,
-                                    pk=self.kwargs.get("pk")).creator
-        is_same_user = utils.is_same_user(request.user, creator)
+        from_user = self.get_object().from_user
+        is_same_user = utils.is_same_user(request.user, from_user)
+
         if not (self.request.user.is_staff or is_same_user):
-            return utils.handle_no_permission(
-                reverse("forum:themes",
-                        kwargs={"category_pk": self.kwargs.get("category_pk")
-                                }))
+            raise PermissionDenied()
+
         return super().dispatch(request, args=args, kwargs=kwargs)
 
     def get_success_url(self):
-        return reverse("forum:themes",
-                       kwargs={"category_pk": self.kwargs.get("category_pk")})
+        return reverse("forum:theme",
+                       kwargs={
+                           "pk": self.kwargs.get("theme_pk")
+                       }) + "?page=last"

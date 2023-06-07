@@ -7,7 +7,8 @@ from django.db import models
 class Category(models.Model):
     name = models.CharField("название категории", max_length=255)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                on_delete=models.CASCADE)
+                                on_delete=models.SET_NULL,
+                                null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     changed_at = models.DateTimeField(auto_now=True)
 
@@ -23,7 +24,8 @@ class Category(models.Model):
 class Theme(models.Model):
     name = models.CharField("название темы", max_length=255)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL,
-                                on_delete=models.CASCADE)
+                                on_delete=models.SET_NULL,
+                                null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE,
                                  related_name="themes")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -45,15 +47,16 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     changed_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f"{self.from_user.name}: {self.text}"
+
     class Meta:
         abstract = True
         verbose_name = "сообщение"
         verbose_name_plural = "сообщения"
+        ordering = ("created_at",)
 
 
 class ThemeMessage(Message):
     theme = models.ForeignKey(Theme, on_delete=models.CASCADE,
                               related_name="messages")
-
-    class Meta(Message.Meta):
-        ordering = ("created_at",)
