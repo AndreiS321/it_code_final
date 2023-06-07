@@ -1,0 +1,11 @@
+{% extends 'base/base.html' %}
+{% block content %}
+<div class="display-4 text-center">Удаление профиля</div>
+<form class="m-3" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <p>Удалить профиль {{ object.name }}?</p>
+    <button type="submit" class="btn btn-danger">Удалить</button>
+    <a href="{% url 'profiles:profile' object.pk %}" class="btn btn-primary">Отмена</a>
+</form>
+{% endblock content %}
