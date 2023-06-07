@@ -6,6 +6,7 @@
     <tr>
         <th style="width: 60%;">Название темы</th>
         <th>Создатель</th>
+        <th>Количество сообщений</th>
         <th>Дата создания</th>
         <th>Последнее изменение</th>
         <th></th>
@@ -16,7 +17,14 @@
     <tr>
         <td><a href="{% url 'forum:theme' theme.pk %}" class="link-underline text-black">{{ theme.name }}</a></td>
         <td>
+            {% if theme.creator %}
             <div><a href="{% url 'profiles:profile' theme.creator.pk %}" class="link-underline link-underline-opacity-0 text-black">{{ theme.creator.username }}</a></div>
+            {% else %}
+            <div>Нет автора</div>
+            {% endif %}
+        </td>
+        <td>
+            <div>{{ theme.msg_count }}</div>
         </td>
         <td>
             <div>{{ theme.created_at }}</div>
@@ -24,7 +32,7 @@
         <td>
             <div>{{ theme.changed_at }}</div>
         </td>
-        {% if user.is_staff or theme.creator.pk == user.pk %}
+        {% if user.is_staff or theme.creator and theme.creator.pk == user.pk %}
         <td>
             <div><a href="{% url 'forum:theme_delete' category.pk theme.pk %}" class="btn btn-danger m-3">Удалить</a></div>
         </td>

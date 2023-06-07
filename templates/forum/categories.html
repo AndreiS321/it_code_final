@@ -6,6 +6,7 @@
     <tr>
         <th style="width: 60%;">Название категории</th>
         <th>Создатель</th>
+        <th>Количество тем</th>
         <th>Дата создания</th>
         <th>Последнее изменение</th>
         <th></th>
@@ -16,7 +17,14 @@
     <tr>
         <td><a class="link-underline text-black" style="word-break: break-all;" href="{% url 'forum:themes' category.pk %}">{{ category.name }}</a></td>
         <td>
+            {% if category.creator %}
             <div><a href="{% url 'profiles:profile' category.creator.pk %}" class="link-underline link-underline-opacity-0 text-black">{{ category.creator.username }}</a></div>
+            {% else %}
+            <div>Нет автора</div>
+            {% endif %}
+        </td>
+        <td>
+            <div>{{ category.themes_count }}</div>
         </td>
         <td>
             <div>{{ category.created_at }}</div>

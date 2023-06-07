@@ -32,8 +32,13 @@
         </div>
         <div class="col-md-10">
             <div class="card-body">
-                <h5 class="card-title"><a class="link-underline link-underline-opacity-0 text-black"
-                                          href="{% url 'profiles:profile' message.from_user.pk %}">{{ message.from_user.username }}</a></h5>
+                <h5 class="card-title d-flex justify-content-between">
+                    <a class="link-underline link-underline-opacity-0 text-black"
+                                          href="{% url 'profiles:profile' message.from_user.pk %}">{{ message.from_user.username }}</a>
+                    {% if is_staff or message.from_user.pk == user.pk %}
+                    <a href="{% url 'forum:delete_message' message.theme.pk message.pk %}" class="btn btn-danger">Удалить сообщение</a>
+                    {% endif %}
+                </h5>
                 <p class="card-text">{{ message.text }}</p>
                 <p class="card-text"><small class="text-body-secondary">{{ message.created_at }}</small></p>
             </div>
@@ -44,12 +49,18 @@
 <div class="display-4 text-center">Нет сообщений в теме!</div>
 {% endfor %}
 <div class="mx-auto d-flex">
+{% if user.is_authenticated %}
 <form class="mx-auto d-flex flex-column" method="post" action="{% url 'forum:create_message' %}">
     {% csrf_token %}
     {{ form }}
     <button type="submit" class="btn btn-success m-3">Отправить</button>
 </form>
+
+{% else %}
+<a href="{% url 'profiles:login' %}" class="mx-auto text-center">Войдите чтобы отправлять сообщения</a>
+{% endif %}
 </div>
+
 <div class="pagination m-3">
     <span class="step-links">
         {% if page_obj.has_previous %}
